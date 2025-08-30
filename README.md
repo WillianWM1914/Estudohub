@@ -1,3 +1,3 @@
-# EstudoHub v5.1
+# EstudoHub v5.2
 
-Versão completa (todos os tipos + botão editar funcionando).
+Correção: uso de `&&` no JSX em vez de `and`, evitando tela em branco.
