@@ -17,16 +17,13 @@
   <body class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
     <div id="root"></div>
     <script type="text/babel">
-// ===== React hooks =====
 const {useState, useMemo, useEffect, useRef} = React;
 
-// ===== Constantes =====
 const STORAGE_KEY_ITEMS = "estudohub_items_v1";
 const STORAGE_KEY_PREFS = "estudohub_prefs_v1";
 const CATEGORIES = ["Filosofia","Jurídica","Religião","Saúde","Atualidades"];
 const TYPES = ["Livro","Artigo","Notícia","Informação","Vídeo","Curso","Legislação"];
 
-// ===== Helpers =====
 const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 const loadLS = (k,f)=>{try{const r=localStorage.getItem(k);return r?JSON.parse(r):f}catch(e){return f}};
 const saveLS = (k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
@@ -83,7 +80,7 @@ function formatABNT(it){
     const vol = it.volume ? `v. ${it.volume}, ` : "";
     const num = it.issue ? `n. ${it.issue}, ` : "";
     const anoStr = ano ? `${ano}.` : "";
-    return `${autores}. ${it.title}. ${per}${vol}${num}${paginas} ${anoStr}${doiPart}`.replace(/\s{2,}/g," ").trim();
+    return `${autores}. ${it.title}. ${per}${vol}{num}${paginas} ${anoStr}${doiPart}`.replace(/\s{2,}/g," ").trim();
   }
   const anoStr = ano ? ` (${ano}).` : "";
   return `${autores}. ${it.title}.${anoStr}${doiPart}`.replace(/\s{2,}/g," ").trim();
@@ -100,7 +97,7 @@ function formatAPA(it){
     const peri = it.journal ? ` ${it.journal},` : "";
     const volNum = it.volume ? ` ${it.volume}${it.issue ? `(${it.issue})` : ""},` : "";
     const pags = it.pages ? ` ${it.pages}.` : "";
-    return `${autores} (${ano}). ${it.title}.${peri}${volNum}${pags}${doiPart}`.replace(/\s{2,}/g," ").trim();
+    return `${autores} (${ano}). ${it.title}.${peri}{volNum}{pags}${doiPart}`.replace(/\s{2,}/g," ").trim();
   }
   return `${autores} (${ano}). ${it.title}.${doiPart}`.replace(/\s{2,}/g," ").trim();
 }
@@ -144,7 +141,6 @@ function Modal({open,onClose,children,title}){
   );
 }
 
-// ===== Form =====
 function ItemForm({initial,onCancel,onSubmit}){
   const [title,setTitle] = useState(initial?.title||"");
   const [type,setType] = useState(initial?.type||"Artigo");
@@ -243,7 +239,6 @@ function ItemForm({initial,onCancel,onSubmit}){
   );
 }
 
-// ===== App =====
 function App(){
   const [items,setItems] = useState(()=>loadLS(STORAGE_KEY_ITEMS,[]));
   const [prefs,setPrefs] = useState(()=>loadLS(STORAGE_KEY_PREFS,{dark:true}));
@@ -522,23 +517,36 @@ function App(){
         EstudoHub · FILOSOFIA · JURÍDICA · RELIGIÃO · SAÚDE · ATUALIDADES · v2
       </footer>
 
+      {/* Botão flutuante que abre o formulário */}
       <button
         className="fixed bottom-6 right-6 inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow-lg"
-        onClick={()=>document.querySelector('header button.inline-flex').click()}
+        onClick={()=>setShowForm(true)}
         title="Adicionar material"
       >
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 5v14M5 12h14"/></svg>
         Adicionar
       </button>
 
-      <Modal open={false} onClose={()=>{}} title="">
-        <div></div>
+      {/* Modal real, controlado por showForm */}
+      <Modal
+        open={showForm}
+        onClose={()=>{ setShowForm(false); setEditing(null);}}
+        title={editing? "Editar material" : "Adicionar material"}
+      >
+        <ItemForm
+          initial={editing}
+          onCancel={()=>{ setShowForm(false); setEditing(null);}}
+          onSubmit={(payload)=>{
+            if(editing){ setItems(prev=>prev.map(it=>it.id===editing.id? {...it,...payload}:it)); }
+            else { addItem(payload); }
+            setShowForm(false); setEditing(null);
+          }}
+        />
       </Modal>
     </div>
   );
 }
 
-// Montar
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<App/>);
     </script>
