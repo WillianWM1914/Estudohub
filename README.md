@@ -1,4 +1,3 @@
-# EstudoHub v5
+# EstudoHub v5.1
 
-Inclui novos tipos: Podcast, Slide, Relatório, PDF, NotebookLM, Manuais, Modelos de Peças.
-Botão Editar reativado e funcionando.
+Versão com todos os tipos + botão editar funcionando.
